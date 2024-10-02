@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fullscreen Iframe & Webcam</title>
+    <style>
+        /* Reset margins and padding */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden; /* Prevents scrollbars */
+        }
+
+        /* Fullscreen iframe styling */
+        iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none; /* Remove border */
+            z-index: -1; /* Push the iframe behind other content */
+        }
+
+        /* Webcam container styles */
+        #webcam-container {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            z-index: 1; /* Keep the webcam section on top */
+        }
+
+        /* Video and image styling */
+        #video-container {
+            margin-top: 15px;
+            position: relative;
+            width: 320px;
+            height: 240px;
+            border: 1px solid #ccc;
+            background-color: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #canvas {
+            display: none;
+        }
+
+        #image-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #image-container img {
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Button styles */
+        .btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .webcam-btn {
+            background-color: #28a745;
+        }
+
+        .webcam-btn:hover {
+            background-color: #218838;
+        }
+
+        .capture-btn {
+            background-color: #dc3545;
+        }
+
+        .capture-btn:hover {
+            background-color: #c82333;
+        }
+
+        /* Center the container on smaller screens */
+        @media (max-width: 768px) {
+            #webcam-container {
+                width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Fullscreen iframe -->
+    <iframe src="http://Sushmitha.socialmm.in" title="Sushmitha Site"></iframe>
+
+    <!-- Webcam functionality container -->
+    <div id="webcam-container">
+        <h1>Webcam Capture</h1>
+        <button id="start-webcam-button" class="btn webcam-btn">Start Webcam</button>
+        
+        <div id="video-container">
+            <video id="video" autoplay></video>
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <button id="capture-button" class="btn capture-btn" style="display: none;">Capture Image</button>
+
+        <!-- Display captured image -->
+        <div id="image-container"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startWebcamButton = document.getElementById('start-webcam-button');
+            const captureButton = document.getElementById('capture-button');
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+            const imageContainer = document.getElementById('image-container');
+            let isWebcamActive = false;
+
+            // Start Webcam Functionality
+            startWebcamButton.addEventListener('click', () => {
+                if (!isWebcamActive) {
+                    navigator.mediaDevices.getUserMedia({ video: true })
+                        .then(stream => {
+                            video.srcObject = stream;
+                            video.style.display = 'block'; // Show video when webcam starts
+                            video.play();
+                            isWebcamActive = true;
+                            startWebcamButton.textContent = 'Stop Webcam';
+                            captureButton.style.display = 'inline-block'; // Show capture button when webcam is active
+                        })
+                        .catch(error => {
+                            console.error('Error accessing webcam:', error);
+                        });
+                } else {
+                    const stream = video.srcObject;
+                    if (stream) {
+                        const tracks = stream.getTracks();
+                        tracks.forEach(track => track.stop());
+                    }
+                    video.srcObject = null;
+                    video.style.display = 'none';
+                    canvas.style.display = 'none';
+                    startWebcamButton.textContent = 'Start Webcam';
+                    captureButton.style.display = 'none'; // Hide capture button when webcam stops
+                    isWebcamActive = false;
+                }
+            });
+
+            // Capture Image Functionality
+            captureButton.addEventListener('click', () => {
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const imageData = canvas.toDataURL('image/png');
+                
+                // Display the captured image
+                const img = document.createElement('img');
+                img.src = imageData;
+                img.style.display = 'block';
+                imageContainer.innerHTML = ''; // Clear previous image
+                imageContainer.appendChild(img);
+            });
+        });
+    </script>
+</body>
+</html>

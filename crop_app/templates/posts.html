@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress Posts</title>
+ 
+<body>
+    <h1>WordPress Posts</h1>
+    <div>
+        {% for post in posts %}
+            <div class="post">
+                <h2><a href="{{ post.link }}">{{ post.title.rendered }}</a></h2>
+                <p>{{ post.date }}</p>
+                <div>
+                    <!-- Render the content safely using the safe filter -->
+                    {{ post.content.rendered|safe }}
+                </div>
+            </div>
+        {% empty %}
+            <p>No posts found.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>
